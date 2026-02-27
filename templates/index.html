@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahayak AI | Student Command Center</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body class="bg-dark text-white">
+
+    <div class="container mt-5">
+        <div class="row animate__animated animate__fadeInDown">
+            <div class="col-12 mb-5 text-center">
+                <h1 class="display-4 fw-bold text-info">
+                    <i class="fas fa-brain me-3"></i>Study<span class="text-white"> Planner</span>
+                </h1>
+                <p class="text-secondary opacity-75 typewriter-target">Initializing Academic Architecture...</p>
+                
+                <div class="progress mx-auto shadow-glow-blue" style="width: 60%; height: 20px;">
+                    <div id="mainProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%">0% SYNCED</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4 animate__animated animate__fadeInLeft">
+                <div class="card glass-card p-4 shadow-lg border-0 h-100">
+                    <h3 class="h5 mb-4 text-primary"><i class="fas fa-terminal me-2"></i>New Objective</h3>
+                    <form id="missionForm" action="/add-task/" method="POST"> 
+                        {% csrf_token %} 
+                        <div class="mb-3">
+                            <label class="small text-secondary mb-1">Subject / Domain</label>
+                            <input type="text" name="subject" class="form-control custom-input" placeholder="e.g. Java Inheritance" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="small text-secondary mb-1">Target Date</label>
+                            <input type="date" name="exam_date" class="form-control custom-input" required>
+                        </div>
+                        <button type="submit" class="btn btn-info w-100 fw-bold shadow-glow">
+                            DEPLOY MISSION
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-8 animate__animated animate__fadeInRight">
+                <div class="card glass-card border-0 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="h5 mb-0"><i class="fas fa-microchip me-2 text-info"></i>Active Missions</h3>
+                        
+                        <button onclick="downloadPlan()" class="btn btn-outline-info btn-sm rounded-pill px-3">
+                            <i class="fas fa-download me-1"></i> Export Plan
+                        </button>
+                    </div>
+
+                    <ul class="list-group list-group-flush" id="missionList">
+                        {% for task in tasks %}
+                        <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center mb-3 border rounded border-secondary hover-glow-blue mission-item">
+                            <div class="d-flex align-items-center">
+                                <input type="checkbox" class="form-check-input me-3 mission-checkbox" onchange="updateSystemProgress()">
+                                
+                                <span class="mission-icon">
+                                    {% if "Java" in task.name %}
+                                        <i class="fab fa-java text-warning me-2"></i> {% elif "Forensics" in task.name %}
+                                        <i class="fas fa-user-secret text-info me-2"></i> {% elif "AI" in task.name %}
+                                        <i class="fas fa-robot text-primary me-2"></i> {% else %}
+                                        <i class="fas fa-book-open text-secondary me-2"></i>
+                                    {% endif %}
+                                </span>
+                                <span class="mission-name">{{ task.name }}</span>
+                            </div>
+                            <span class="badge rounded-pill bg-dark border border-info text-info">{{ task.date }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item bg-transparent text-secondary text-center py-5">
+                            <i class="fas fa-satellite-dish d-block mb-2 fs-3"></i>
+                            Waiting for Command Input...
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-glow"></div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
