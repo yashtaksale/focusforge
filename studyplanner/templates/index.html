@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light only">
+    <title>StudyBuddy 🎯</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Architects+Daughter&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="site-nav">
+        <div class="nav-brand">
+            <span class="nav-brand-icon">📚</span>
+            StudyBuddy
+        </div>
+        <div class="nav-right">
+            <span class="nav-user">
+                <i class="fas fa-circle"></i>
+                {{ request.user.username }}
+            </span>
+            <a href="/logout/" class="btn-logout" title="Logout">
+                <i class="fas fa-power-off"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="page-wrap">
+
+        <!-- Hero -->
+        <div class="hero">
+            <h1 class="hero-title">
+                Hey {{ request.user.username }}, let's <span>get it done</span> 🔥
+            </h1>
+            <p class="hero-sub">Your personal AI study planner — smart, simple, stress-free</p>
+
+            <div class="hero-progress">
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" id="mainProgressBar" style="width:0%"></div>
+                </div>
+                <div class="progress-bar-label" id="progressLabel">Start by adding a subject below</div>
+            </div>
+
+            <div class="stats-strip">
+                <div class="stat-chip coral">
+                    <i class="fas fa-book-open"></i>
+                    <span id="statTotal">0</span> Sessions
+                </div>
+                <div class="stat-chip mint">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="statDone">0</span> Done
+                </div>
+                <div class="stat-chip sky">
+                    <i class="fas fa-fire"></i>
+                    <span id="statPercent">0%</span> Complete
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+
+            <!-- LEFT — Form + Missions -->
+            <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+                <!-- Add Subject Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-plus icon-coral"></i>
+                            Add New Subject
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="missionForm" class="subject-form">
+                            {% csrf_token %}
+
+                            <div>
+                                <label class="field-label">Subject Name</label>
+                                <input type="text" name="subject"
+                                       class="field-input"
+                                       placeholder="e.g. Physics, Java, Maths..."
+                                       required>
+                            </div>
+
+                            <div>
+                                <label class="field-label">How hard is it? 😅</label>
+                                <div class="difficulty-picker">
+                                    <label class="diff-option">
+                                        <input type="radio" name="difficulty" value="1">
+                                        <span class="diff-btn easy">😌 Easy</span>
+                                    </label>
+                                    <label class="diff-option">
+                                        <input type="radio" name="difficulty" value="2" checked>
+                                        <span class="diff-btn medium">😤 Medium</span>
+                                    </label>
+                                    <label class="diff-option">
+                                        <input type="radio" name="difficulty" value="3">
+                                        <span class="diff-btn hard">😱 Hard</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="field-label">Exam Date 📅</label>
+                                <input type="date" name="exam_date"
+                                       class="field-input" required>
+                            </div>
+
+                            <button type="submit" class="btn-deploy" id="deployBtn">
+                                <span class="btn-text">
+                                    ✨ Generate My Study Plan
+                                </span>
+                                <span class="btn-loading" style="display:none">
+                                    <i class="fas fa-spinner fa-spin me-1"></i> Generating...
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Active Subjects Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-list-check icon-mint"></i>
+                            My Subjects
+                        </div>
+                        <button onclick="downloadPlan()" class="btn-export">
+                            <i class="fas fa-download"></i> Export PDF
+                        </button>
+                    </div>
+                    <div class="card-body" style="padding-top:0.75rem;">
+                        <ul class="mission-list" id="missionList">
+                            <li class="mission-empty">
+                                <i class="fas fa-seedling"></i>
+                                <p>No subjects added yet.<br>Add one above to get started! 🌱</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT — Timetable -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-calendar-alt icon-sky"></i>
+                        My Study Schedule
+                    </div>
+                    <span class="schedule-status" id="scheduleStatus">
+                        Awaiting plan ✨
+                    </span>
+                </div>
+                <div class="card-body" id="timetableContainer">
+                    <div class="empty-schedule">
+                        <i class="fas fa-calendar-alt"></i>
+                        <p>Your personalised timetable<br>will appear here after you<br>add a subject! 🗓️</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
