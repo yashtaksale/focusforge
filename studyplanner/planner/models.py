@@ -16,6 +16,7 @@ class Subject(models.Model):
                                validators=[MinValueValidator(0), MaxValueValidator(100)])
     daily_hours_available = models.FloatField(default=4.0,
                                validators=[MinValueValidator(0.5), MaxValueValidator(16.0)])
+    selected_topics       = models.JSONField(default=list, blank=True)
     created_at            = models.DateTimeField(auto_now_add=True)
 
     class Meta:

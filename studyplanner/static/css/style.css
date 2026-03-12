@@ -1043,3 +1043,69 @@ body::after {
     background: var(--border-hi);
     border-radius: 99px;
 }
+
+/* ── TOPIC CHIPS ─────────────────────────────────────── */
+.topic-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.4rem;
+}
+
+.topic-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 99px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.topic-chip:hover {
+    border-color: var(--coral);
+    color: var(--coral);
+    background: rgba(255,107,107,0.06);
+}
+
+.topic-chip.selected {
+    border-color: var(--coral);
+    background: rgba(255,107,107,0.12);
+    color: var(--coral);
+}
+
+.topic-chip.selected::before {
+    content: "✓ ";
+    font-weight: 900;
+}
+
+.selected-topics-preview {
+    margin-top: 0.6rem;
+    padding: 0.6rem 0.85rem;
+    background: rgba(255,107,107,0.07);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--coral);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.5;
+}
+
+.topics-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--coral);
+    background: rgba(255,107,107,0.1);
+    border: 1.5px solid rgba(255,107,107,0.25);
+    border-radius: 99px;
+    padding: 0.2rem 0.6rem;
+}

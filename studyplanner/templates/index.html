@@ -7,7 +7,7 @@
     <title>StudyBuddy 🎯</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Architects+Daughter&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
 </head>
 <body>
 
@@ -122,6 +122,7 @@
                         <form id="missionForm" class="subject-form">
                             {% csrf_token %}
 
+                            <!-- Subject Name -->
                             <div>
                                 <label class="field-label">Subject Name</label>
                                 <div class="autocomplete-wrap">
@@ -135,6 +136,22 @@
                                 </div>
                             </div>
 
+                            <!-- Topic Selector -->
+                            <div id="topicSection" style="display:none;">
+                                <label class="field-label">
+                                    Which topics? 🎯
+                                    <span style="font-weight:600;color:var(--text-dim);font-size:0.78rem;">
+                                        (pick what you want to learn)
+                                    </span>
+                                </label>
+                                <div class="topic-chips" id="topicChips"></div>
+                                <div id="selectedTopicsPreview" class="selected-topics-preview" style="display:none;">
+                                    <i class="fas fa-route" style="color:var(--coral);margin-top:2px;flex-shrink:0;"></i>
+                                    <span id="topicPreviewText"></span>
+                                </div>
+                            </div>
+
+                            <!-- Difficulty -->
                             <div>
                                 <label class="field-label">How hard is it? 😅</label>
                                 <div class="difficulty-picker">
@@ -153,6 +170,7 @@
                                 </div>
                             </div>
 
+                            <!-- Exam Date -->
                             <div>
                                 <label class="field-label">Exam Date 📅</label>
                                 <input type="date" name="exam_date"
@@ -160,9 +178,7 @@
                             </div>
 
                             <button type="submit" class="btn-deploy" id="deployBtn">
-                                <span class="btn-text">
-                                    ✨ Generate My Study Plan
-                                </span>
+                                <span class="btn-text">✨ Generate My Study Plan</span>
                                 <span class="btn-loading" style="display:none">
                                     <i class="fas fa-spinner fa-spin me-1"></i> Generating...
                                 </span>
@@ -221,6 +237,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="{% static 'js/script.js' %}?v=8"></script>
+    <script src="{% static 'js/script.js' %}?v=10"></script>
 </body>
 </html>

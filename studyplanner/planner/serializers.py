@@ -5,15 +5,17 @@ from .models import Subject, StudySession
 
 
 class SubjectSerializer(serializers.ModelSerializer):
-    days_left      = serializers.IntegerField(read_only=True)
-    is_exam_passed = serializers.BooleanField(read_only=True)
-    priority_label = serializers.CharField(read_only=True)
+    days_left       = serializers.IntegerField(read_only=True)
+    is_exam_passed  = serializers.BooleanField(read_only=True)
+    priority_label  = serializers.CharField(read_only=True)
+    selected_topics = serializers.JSONField(required=False, default=list)
 
     class Meta:
         model  = Subject
         fields = [
             "id", "name", "exam_date", "difficulty",
             "syllabus_completion", "daily_hours_available",
+            "selected_topics",
             "days_left", "is_exam_passed", "priority_label",
             "created_at",
         ]
@@ -31,6 +33,11 @@ class SubjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Syllabus completion must be between 0 and 100."
             )
+        return value
+
+    def validate_selected_topics(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Topics must be a list.")
         return value
 
     def validate(self, attrs):

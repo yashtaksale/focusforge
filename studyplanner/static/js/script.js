@@ -1,3 +1,260 @@
+// ── SUBJECT TOPICS MAP ────────────────────────────────
+const SUBJECT_TOPICS = {
+    "python": {
+        topics: ["Syntax & Basics", "Strings", "Lists & Tuples", "Dictionaries", "Loops", "Functions", "OOP", "File Handling", "Exception Handling", "Modules", "List Comprehensions", "Recursion", "Projects"],
+        steps: {
+            "Syntax & Basics":     ["Install Python and setup VS Code", "Variables and data types — int, float, str, bool", "Type conversion and input() function", "Comments and indentation rules"],
+            "Strings":             ["String creation and indexing", "String slicing and negative indexing", "String methods — upper, lower, strip, split", "f-strings and format() method"],
+            "Lists & Tuples":      ["Create and access lists", "List methods — append, insert, remove, pop", "List slicing and copying", "Tuples — immutability and use cases"],
+            "Dictionaries":        ["Create dictionaries and access values", "Dictionary methods — keys, values, items", "Add, update and delete entries", "Iterate through dictionaries"],
+            "Loops":               ["for loop with range()", "for loop over lists and strings", "while loop and conditions", "break, continue and pass", "Nested loops and pattern printing"],
+            "Functions":           ["Define functions with def", "Parameters and return values", "Default and keyword arguments", "*args and **kwargs", "Lambda functions and map/filter"],
+            "OOP":                 ["Classes and objects basics", "Constructor __init__ and self", "Inheritance and super()", "Polymorphism and method overriding", "Encapsulation and dunder methods"],
+            "File Handling":       ["Open and read files", "Write and append to files", "Working with CSV files", "Using with statement"],
+            "Exception Handling":  ["try/except basics", "Multiple except blocks", "finally and else blocks", "Raise custom exceptions"],
+            "Modules":             ["import and from import", "Built-in modules — os, sys, math, random", "Installing packages with pip", "Creating your own module"],
+            "List Comprehensions": ["Basic list comprehension syntax", "Conditional list comprehensions", "Dictionary comprehensions", "Generator expressions"],
+            "Recursion":           ["Base case and recursive case", "Factorial using recursion", "Fibonacci sequence recursively", "When recursion vs loops"],
+            "Projects":            ["Build a calculator", "Build a to-do list CLI", "Number guessing game", "Simple contact book"],
+        }
+    },
+    "java": {
+        topics: ["Basics", "OOP", "Arrays & Strings", "Collections", "Exception Handling", "File I/O", "Multithreading", "Java 8 Features", "Projects"],
+        steps: {
+            "Basics":             ["JDK setup and Hello World", "Variables, data types and type casting", "Operators and expressions", "Control flow — if/else, switch", "Loops — for, while, do-while"],
+            "OOP":                ["Classes and objects", "Constructors and this keyword", "Inheritance and super keyword", "Method overloading and overriding", "Abstract classes and interfaces"],
+            "Arrays & Strings":   ["1D array declaration and iteration", "2D arrays and matrix operations", "String class and methods", "StringBuilder for mutable strings"],
+            "Collections":        ["ArrayList — add, remove, iterate", "LinkedList operations", "HashMap — key-value pairs", "HashSet for unique elements"],
+            "Exception Handling": ["try/catch/finally basics", "Checked vs unchecked exceptions", "throw and throws keywords", "Custom exception classes"],
+            "File I/O":           ["FileReader and FileWriter basics", "BufferedReader for efficient reading", "BufferedWriter for writing", "Serialization basics"],
+            "Multithreading":     ["Thread class and Runnable interface", "Creating and starting threads", "synchronized keyword", "wait and notify"],
+            "Java 8 Features":    ["Lambda expressions syntax", "Functional interfaces", "Stream API — filter, map, collect", "Method references"],
+            "Projects":           ["Bank account system", "Student management with ArrayList", "Calculator with OOP", "File-based inventory system"],
+        }
+    },
+    "javascript": {
+        topics: ["Basics", "DOM", "Functions", "Arrays & Objects", "Async JS", "ES6+", "Projects"],
+        steps: {
+            "Basics":           ["Variables — var, let, const", "Data types and typeof", "Operators and expressions", "Conditionals — if/else, ternary", "Loops — for, while, for...of"],
+            "DOM":              ["Select elements — getElementById, querySelector", "Modify text — textContent, innerHTML", "Change CSS styles with JS", "Add/remove CSS classes", "Create and append elements", "Remove elements"],
+            "Functions":        ["Function declarations vs expressions", "Arrow functions syntax", "Default parameters", "Closures and lexical scope", "Higher order functions"],
+            "Arrays & Objects": ["Array methods — map, filter, reduce", "find, some, every, includes", "Object creation and access", "Destructuring arrays and objects", "Spread and rest operators"],
+            "Async JS":         ["Promises — then, catch, finally", "async/await syntax", "Fetch API GET request", "POST request with fetch", "Error handling in async"],
+            "ES6+":             ["Template literals", "Modules — import and export", "Classes and OOP in JS", "Map and Set data structures", "Optional chaining ?."],
+            "Projects":         ["Todo app", "Quiz app with scoring", "Weather app using fetch", "Calculator with DOM", "Expense tracker"],
+        }
+    },
+    "c programming": {
+        topics: ["Basics", "Control Flow", "Functions", "Arrays & Strings", "Pointers", "Structures", "File Handling", "Data Structures"],
+        steps: {
+            "Basics":           ["GCC setup and Hello World", "Variables, data types, format specifiers", "Arithmetic and relational operators", "Input with scanf, output with printf"],
+            "Control Flow":     ["if/else and nested conditions", "switch/case statements", "for loop with examples", "while and do-while loops", "break and continue"],
+            "Functions":        ["Function declaration and definition", "Pass by value parameters", "Return types and void functions", "Recursive functions"],
+            "Arrays & Strings": ["1D array declaration and access", "Array iteration and searching", "2D arrays and matrices", "String functions — strlen, strcpy, strcmp"],
+            "Pointers":         ["Pointer declaration and dereferencing", "Pointer arithmetic", "Pointers and arrays", "Pointers as function parameters"],
+            "Structures":       ["struct declaration and member access", "Array of structures", "Nested structures", "typedef for cleaner code"],
+            "File Handling":    ["fopen and fclose", "Reading with fscanf and fgets", "Writing with fprintf", "Binary file operations"],
+            "Data Structures":  ["Linked list — node creation", "Stack using arrays", "Queue using arrays", "Bubble and selection sort"],
+        }
+    },
+    "c++": {
+        topics: ["Basics", "OOP", "STL", "Templates", "Memory", "Modern C++", "File I/O", "Projects"],
+        steps: {
+            "Basics":      ["Hello World, namespaces, cin/cout", "Variables, data types, references", "Operators and type conversions", "Control flow and loops", "Function overloading"],
+            "OOP":         ["Classes and objects", "Constructors and destructors", "Inheritance — single and multiple", "Polymorphism — virtual functions", "Abstract classes"],
+            "STL":         ["vector — push_back, iterate", "map and unordered_map", "set and unordered_set", "STL algorithms — sort, find"],
+            "Templates":   ["Function templates", "Class templates", "Template specialization"],
+            "Memory":      ["Dynamic memory — new and delete", "Smart pointers — unique_ptr", "shared_ptr and weak_ptr", "RAII principle"],
+            "Modern C++":  ["Lambda expressions", "Move semantics", "auto and decltype", "Range-based for loop"],
+            "File I/O":    ["ifstream and ofstream", "Reading line by line", "Writing formatted output", "Binary file operations"],
+            "Projects":    ["Matrix calculator", "Student management with STL", "Bank system using OOP"],
+        }
+    },
+    "data structures": {
+        topics: ["Arrays", "Linked Lists", "Stacks & Queues", "Trees", "Graphs", "Hashing", "Sorting", "Searching"],
+        steps: {
+            "Arrays":          ["Array basics and memory layout", "Insertion and deletion", "Linear and binary search", "Sorting arrays", "2D arrays"],
+            "Linked Lists":    ["Singly linked list — node structure", "Insert at beginning, end, middle", "Delete by value", "Reverse a linked list", "Doubly linked list"],
+            "Stacks & Queues": ["Stack using arrays — push and pop", "Balanced parentheses problem", "Queue — enqueue and dequeue", "Circular queue"],
+            "Trees":           ["Binary tree — node structure", "Inorder, preorder, postorder traversal", "BST — insert and search", "BST deletion", "Level order traversal"],
+            "Graphs":          ["Adjacency matrix and list", "BFS traversal", "DFS traversal", "Cycle detection"],
+            "Hashing":         ["Hash function basics", "Collision — chaining", "Open addressing", "HashMap implementation"],
+            "Sorting":         ["Bubble and selection sort", "Merge sort", "Quick sort", "Time complexity comparison"],
+            "Searching":       ["Linear search", "Binary search — iterative", "Binary search — recursive", "Search in rotated array"],
+        }
+    },
+    "algorithms": {
+        topics: ["Complexity", "Divide & Conquer", "Greedy", "Dynamic Programming", "Graph Algorithms", "Backtracking", "String Algorithms", "Bit Manipulation"],
+        steps: {
+            "Complexity":          ["Big O — O(1), O(n), O(log n)", "Time vs space complexity", "Best/average/worst case", "Recurrence relations"],
+            "Divide & Conquer":    ["Merge sort implementation", "Quick sort", "Binary search variations", "Closest pair of points"],
+            "Greedy":              ["Activity selection problem", "Fractional knapsack", "Huffman coding", "Dijkstra's shortest path"],
+            "Dynamic Programming": ["Memoization vs tabulation", "0/1 Knapsack", "Longest common subsequence", "Coin change problem"],
+            "Graph Algorithms":    ["BFS and DFS", "Dijkstra's algorithm", "Bellman-Ford", "Kruskal's MST"],
+            "Backtracking":        ["N-Queens problem", "Sudoku solver", "Subset sum", "Permutations"],
+            "String Algorithms":   ["KMP pattern matching", "Rabin-Karp", "Longest palindromic substring", "Edit distance"],
+            "Bit Manipulation":    ["AND, OR, XOR operations", "Left and right shift", "Count set bits", "Power of 2 tricks"],
+        }
+    },
+    "machine learning": {
+        topics: ["Python for ML", "Data Preprocessing", "Regression", "Classification", "Clustering", "Neural Networks", "Model Evaluation", "Projects"],
+        steps: {
+            "Python for ML":      ["NumPy — arrays and operations", "Pandas — DataFrames", "Matplotlib — basic plots", "Seaborn — statistical plots"],
+            "Data Preprocessing": ["Handle missing values", "Encode categorical variables", "Feature scaling — MinMax, Standard", "Train/test split"],
+            "Regression":         ["Linear regression theory", "Implement with sklearn", "Multiple linear regression", "Evaluate — MSE, R²"],
+            "Classification":     ["Logistic regression", "Decision tree classifier", "Random forest", "SVM basics"],
+            "Clustering":         ["K-means algorithm", "Elbow method for K", "Hierarchical clustering", "Silhouette score"],
+            "Neural Networks":    ["Perceptron and activation functions", "Feedforward network with Keras", "Compile and train model", "Evaluate and predict"],
+            "Model Evaluation":   ["Confusion matrix", "Precision, recall, F1", "ROC curve and AUC", "Cross validation"],
+            "Projects":           ["House price prediction", "Spam classifier", "Iris classification", "Customer segmentation"],
+        }
+    },
+    "web development": {
+        topics: ["HTML", "CSS", "JavaScript", "React", "Node.js", "Databases", "Git", "Deployment"],
+        steps: {
+            "HTML":       ["Document structure and tags", "Text, links, images", "Lists, tables, forms", "Semantic HTML5 elements"],
+            "CSS":        ["Selectors and box model", "Flexbox layout", "CSS Grid layout", "Responsive and media queries", "Animations and transitions"],
+            "JavaScript": ["DOM selection and manipulation", "Event listeners", "Fetch API", "Form validation"],
+            "React":      ["Components, JSX and props", "useState and useEffect", "Fetch data and render", "React Router"],
+            "Node.js":    ["Express server setup", "Routes — GET and POST", "Middleware usage", "Connect to MongoDB"],
+            "Databases":  ["SQL basics", "MongoDB CRUD", "Mongoose schema", "Database design"],
+            "Git":        ["git init, add, commit", "Branching and merging", "Push and pull from GitHub", "Pull requests"],
+            "Deployment": ["Vercel for frontend", "Render for backend", "Environment variables", "CORS setup"],
+        }
+    },
+    "react": {
+        topics: ["JSX & Components", "Props & State", "Hooks", "Routing", "State Management", "API Calls", "Performance", "Projects"],
+        steps: {
+            "JSX & Components":  ["JSX syntax and expressions", "Functional components", "Conditional rendering", "Component composition"],
+            "Props & State":     ["Passing and destructuring props", "useState basics", "Updating state correctly", "Lifting state up"],
+            "Hooks":             ["useEffect — fetch on mount", "useEffect cleanup", "useContext — global state", "Custom hooks"],
+            "Routing":           ["BrowserRouter and Routes", "Route, Link and NavLink", "useParams — dynamic routes", "useNavigate"],
+            "State Management":  ["Context API setup", "Redux basics", "Redux Toolkit — createSlice", "useSelector and useDispatch"],
+            "API Calls":         ["useEffect with fetch", "Axios GET and POST", "Loading and error states", "Custom useFetch hook"],
+            "Performance":       ["React.memo", "useMemo", "useCallback", "Lazy loading with Suspense"],
+            "Projects":          ["Todo app — full CRUD", "Weather dashboard", "Auth flow", "Full stack with Django"],
+        }
+    },
+    "sql": {
+        topics: ["Basics", "Filtering & Sorting", "Joins", "Aggregation", "Subqueries", "Advanced SQL", "Database Design", "Projects"],
+        steps: {
+            "Basics":              ["CREATE TABLE — data types", "INSERT, UPDATE, DELETE", "SELECT — retrieve data", "WHERE clause"],
+            "Filtering & Sorting": ["AND, OR, NOT operators", "LIKE and wildcards", "IN and BETWEEN", "ORDER BY and LIMIT"],
+            "Joins":               ["INNER JOIN", "LEFT and RIGHT JOIN", "FULL OUTER JOIN", "Self join"],
+            "Aggregation":         ["COUNT, SUM, AVG, MAX, MIN", "GROUP BY", "HAVING clause", "DISTINCT"],
+            "Subqueries":          ["Subquery in WHERE", "Correlated subqueries", "EXISTS and NOT EXISTS", "Subquery vs JOIN"],
+            "Advanced SQL":        ["Views", "Indexes", "Stored procedures", "Window functions — ROW_NUMBER, RANK"],
+            "Database Design":     ["ER diagram basics", "Primary and foreign keys", "One-to-many relationships", "Normalization — 1NF, 2NF, 3NF"],
+            "Projects":            ["Library management system", "E-commerce queries", "Student result system", "Inventory tracking"],
+        }
+    },
+    "physics": {
+        topics: ["Mechanics", "Thermodynamics", "Waves & Sound", "Electrostatics", "Current Electricity", "Magnetism", "Optics", "Modern Physics"],
+        steps: {
+            "Mechanics":           ["Units and kinematics", "Newton's laws", "Work, energy, power", "Conservation of momentum", "Circular and rotational motion"],
+            "Thermodynamics":      ["Heat transfer", "Specific heat and calorimetry", "First law of thermodynamics", "Second law and entropy"],
+            "Waves & Sound":       ["Wave properties", "Speed of sound", "Doppler effect", "Resonance and standing waves"],
+            "Electrostatics":      ["Coulomb's law", "Electric field and potential", "Capacitors in series and parallel", "Energy stored in capacitor"],
+            "Current Electricity": ["Ohm's law V=IR", "Resistors in series and parallel", "Kirchhoff's laws KCL and KVL", "Wheatstone bridge"],
+            "Magnetism":           ["Magnetic field and field lines", "Force on moving charge", "Biot-Savart law", "Faraday's law"],
+            "Optics":              ["Reflection and mirror formula", "Refraction and Snell's law", "Lens formula", "Ray diagrams"],
+            "Modern Physics":      ["Photoelectric effect", "de Broglie wavelength", "Bohr model", "Radioactivity"],
+        }
+    },
+    "chemistry": {
+        topics: ["Atomic Structure", "Chemical Bonding", "States of Matter", "Thermochemistry", "Equilibrium", "Electrochemistry", "Organic Chemistry", "Reaction Mechanisms"],
+        steps: {
+            "Atomic Structure":    ["Subatomic particles", "Bohr model and energy levels", "Quantum numbers", "Aufbau principle", "Periodic trends"],
+            "Chemical Bonding":    ["Ionic bonding", "Covalent bonding and Lewis structures", "VSEPR and molecular geometry", "Hybridization", "Intermolecular forces"],
+            "States of Matter":    ["Kinetic molecular theory", "Gas laws — Boyle, Charles", "Ideal gas equation PV=nRT", "Properties of liquids and solids"],
+            "Thermochemistry":     ["Enthalpy — exo and endothermic", "Hess's law", "Bond energies", "Gibbs free energy"],
+            "Equilibrium":         ["Dynamic equilibrium", "Kc and Kp expressions", "Le Chatelier's principle", "Buffer solutions"],
+            "Electrochemistry":    ["Oxidation states and redox", "Balancing redox equations", "Galvanic cell and EMF", "Electrolysis — Faraday's laws"],
+            "Organic Chemistry":   ["IUPAC nomenclature", "Functional groups", "Alkanes, alkenes, alkynes", "Aromatic compounds"],
+            "Reaction Mechanisms": ["SN1 and SN2", "Electrophilic addition", "Elimination E1 and E2", "Free radical reactions"],
+        }
+    },
+    "mathematics": {
+        topics: ["Algebra", "Trigonometry", "Coordinate Geometry", "Calculus", "Vectors", "Matrices", "Probability", "Statistics"],
+        steps: {
+            "Algebra":             ["Polynomials and factor theorem", "Quadratic equations", "AP and GP sequences", "Logarithms and exponentials"],
+            "Trigonometry":        ["Trig ratios — sin, cos, tan", "Pythagorean identities", "Compound angle formulas", "Solving trig equations"],
+            "Coordinate Geometry": ["Distance and midpoint formula", "Straight lines — slope forms", "Circles — standard form", "Parabola and ellipse"],
+            "Calculus":            ["Limits and continuity", "Differentiation rules", "Maxima and minima", "Integration — substitution", "Definite integrals"],
+            "Vectors":             ["Vector addition and subtraction", "Dot product and angle", "Cross product and area", "Vector equations of lines"],
+            "Matrices":            ["Matrix operations", "Determinant — 2x2 and 3x3", "Inverse of a matrix", "Solving linear systems"],
+            "Probability":         ["Basic probability rules", "Conditional probability", "Bayes theorem", "Binomial distribution"],
+            "Statistics":          ["Mean, median, mode", "Variance and standard deviation", "Correlation coefficient", "Hypothesis testing"],
+        }
+    },
+    "biology": {
+        topics: ["Cell Biology", "Genetics", "Molecular Biology", "Human Physiology", "Plant Biology", "Ecology", "Evolution", "Biotechnology"],
+        steps: {
+            "Cell Biology":      ["Prokaryote vs eukaryote", "Cell organelles and functions", "Cell membrane transport", "Mitosis — PMAT stages", "Meiosis stages"],
+            "Genetics":          ["Mendel's law of segregation", "Monohybrid and dihybrid cross", "Codominance and incomplete dominance", "Sex-linked traits", "Chromosomal disorders"],
+            "Molecular Biology": ["DNA double helix structure", "DNA replication", "Transcription — DNA to mRNA", "Translation — mRNA to protein"],
+            "Human Physiology":  ["Digestive system — organs and enzymes", "Circulatory system — heart", "Respiratory system — gas exchange", "Excretory system — nephron"],
+            "Plant Biology":     ["Plant tissue types", "Photosynthesis — light reactions", "Calvin cycle", "Plant hormones"],
+            "Ecology":           ["Ecosystem components", "Food chains and food webs", "Energy flow — 10% law", "Biogeochemical cycles"],
+            "Evolution":         ["Darwin's natural selection", "Evidence for evolution", "Speciation", "Hardy-Weinberg equilibrium"],
+            "Biotechnology":     ["Recombinant DNA technology", "PCR steps and applications", "Gel electrophoresis", "CRISPR-Cas9 basics"],
+        }
+    },
+    "history": {
+        topics: ["Ancient History", "Medieval History", "Modern History", "Indian Independence", "World Wars", "Revision"],
+        steps: {
+            "Ancient History":     ["Indus Valley Civilization", "Vedic period and kingdoms", "Mauryan Empire — Ashoka", "Gupta Empire — golden age"],
+            "Medieval History":    ["Delhi Sultanate — five dynasties", "Mughal Empire — Akbar", "Maratha Empire — Shivaji", "Vijayanagara kingdom"],
+            "Modern History":      ["British East India Company", "1857 revolt — causes and effects", "Social reform movements", "Early nationalism — INC 1885"],
+            "Indian Independence": ["Non-cooperation movement 1920", "Civil disobedience — Salt March", "Quit India 1942", "Partition of India 1947"],
+            "World Wars":          ["WWI — causes and outcome", "WWII — causes and Holocaust", "Post-war — UN formation", "Cold War — USA vs USSR"],
+            "Revision":            ["Timeline of Indian history", "Key personalities", "Important dates", "Previous year questions"],
+        }
+    },
+    "geography": {
+        topics: ["Physical Geography", "Human Geography", "Indian Geography", "World Geography", "Map Skills", "Revision"],
+        steps: {
+            "Physical Geography": ["Earth's structure", "Rocks and minerals", "Landforms — mountains, plains", "Rivers and glaciers"],
+            "Human Geography":    ["Population distribution", "Migration — push and pull", "Urbanization", "Agriculture types"],
+            "Indian Geography":   ["Physical features — Himalayas", "Rivers — Ganga, Brahmaputra", "Monsoon mechanism", "Natural resources"],
+            "World Geography":    ["Continents and oceans", "Major mountain ranges", "Climate zones", "Major countries capitals"],
+            "Map Skills":         ["Latitude and longitude", "Time zones", "Topographic maps — contour lines", "Scale and directions"],
+            "Revision":           ["Map identification practice", "Fill in key facts", "Environmental issues", "Previous year questions"],
+        }
+    },
+    "economics": {
+        topics: ["Microeconomics", "Macroeconomics", "Money & Banking", "Indian Economy", "International Trade", "Revision"],
+        steps: {
+            "Microeconomics":    ["Demand — law and determinants", "Supply — law and determinants", "Market equilibrium", "Elasticity of demand"],
+            "Macroeconomics":    ["National income — GDP, GNP, NNP", "Circular flow of income", "Keynesian multiplier", "AD-AS model"],
+            "Money & Banking":   ["Functions of money", "Commercial bank — credit creation", "RBI functions", "Monetary policy tools"],
+            "Indian Economy":    ["Economic planning — Five Year Plans", "Poverty — causes and measures", "Unemployment types", "GST and tax reforms"],
+            "International Trade":["Comparative advantage", "Balance of payments", "Exchange rates", "WTO and trade agreements"],
+            "Revision":          ["Key definitions and formulas", "Demand supply diagrams", "National income numericals", "Previous year questions"],
+        }
+    },
+    "accountancy": {
+        topics: ["Journal & Ledger", "Financial Statements", "Partnership", "Company Accounts", "Ratio Analysis", "Revision"],
+        steps: {
+            "Journal & Ledger":     ["Rules of debit and credit — DEAD CLIC", "Journal entries — simple and compound", "Ledger posting and balancing", "Trial balance preparation"],
+            "Financial Statements": ["Trading account — gross profit", "Profit and loss account", "Balance sheet — assets and liabilities", "Adjustments — prepaid, accrued"],
+            "Partnership":          ["Profit sharing and interest on capital", "Admission — goodwill and revaluation", "Retirement — gaining ratio", "Dissolution — realisation account"],
+            "Company Accounts":     ["Issue of shares at par and premium", "Forfeiture and reissue of shares", "Issue of debentures", "Redemption of debentures"],
+            "Ratio Analysis":       ["Liquidity — current and quick ratio", "Profitability — gross and net profit ratio", "Solvency — debt-equity ratio", "Activity — inventory turnover"],
+            "Revision":             ["Journal entry practice", "Prepare P&L account", "Balance sheet from trial balance", "Previous year board questions"],
+        }
+    },
+};
+
+const GENERIC_TOPICS = {
+    "history":     ["Ancient History", "Medieval History", "Modern History", "Indian Independence", "World Wars", "Revision"],
+    "geography":   ["Physical Geography", "Human Geography", "Indian Geography", "World Geography", "Map Skills", "Revision"],
+    "economics":   ["Microeconomics", "Macroeconomics", "Money & Banking", "Indian Economy", "International Trade", "Revision"],
+    "accountancy": ["Journal & Ledger", "Financial Statements", "Partnership", "Company Accounts", "Ratio Analysis", "Revision"],
+    "english":     ["Grammar", "Reading Comprehension", "Writing Skills", "Literature", "Vocabulary", "Revision"],
+};
+
+
 document.addEventListener("DOMContentLoaded", function () {
     loadSessions();
     initAutocomplete();
@@ -12,6 +269,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const examDate   = form.querySelector('input[name="exam_date"]').value;
         const diffInput  = form.querySelector('input[name="difficulty"]:checked');
         const difficulty = diffInput ? parseInt(diffInput.value, 10) : 2;
+
+        // ── Collect selected topics ───────────────────
+        const selectedTopics = [...document.querySelectorAll(".topic-chip.selected")]
+            .map(el => el.dataset.topic);
 
         const btn     = document.getElementById("deployBtn");
         const btnText = btn.querySelector(".btn-text");
@@ -29,11 +290,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     "X-CSRFToken": getCookie("csrftoken"),
                 },
                 body: JSON.stringify({
-                    name: subject,
-                    exam_date: examDate,
-                    difficulty: difficulty,
-                    syllabus_completion: 0,
+                    name:                  subject,
+                    exam_date:             examDate,
+                    difficulty:            difficulty,
+                    syllabus_completion:   0,
                     daily_hours_available: 4,
+                    selected_topics:       selectedTopics,
                 }),
             });
 
@@ -57,6 +319,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             await loadSessions();
             form.reset();
+
+            // Reset topic section
+            document.getElementById("topicSection").style.display = "none";
+            document.getElementById("topicChips").innerHTML = "";
+            document.getElementById("selectedTopicsPreview").style.display = "none";
 
         } catch (err) {
             console.error(err);
@@ -130,7 +397,11 @@ function initAutocomplete() {
         list.innerHTML = "";
         activeIndex = -1;
 
-        if (!val) { list.classList.remove("open"); return; }
+        if (!val) {
+            list.classList.remove("open");
+            document.getElementById("topicSection").style.display = "none";
+            return;
+        }
 
         const matches = SUBJECTS.filter(s =>
             s.toLowerCase().startsWith(val)
@@ -141,7 +412,6 @@ function initAutocomplete() {
         matches.forEach((subject) => {
             const item = document.createElement("div");
             item.className = "autocomplete-item";
-
             const highlighted = `<span class="autocomplete-highlight">${subject.slice(0, val.length)}</span>${subject.slice(val.length)}`;
             item.innerHTML = `<i class="fas fa-book"></i> ${highlighted}`;
 
@@ -149,12 +419,19 @@ function initAutocomplete() {
                 e.preventDefault();
                 input.value = subject;
                 list.classList.remove("open");
+                showTopics(subject);   // ← trigger topics
             });
 
             list.appendChild(item);
         });
 
         list.classList.add("open");
+    });
+
+    // Also trigger topics when user types a full matching subject and blurs
+    input.addEventListener("blur", function () {
+        const val = this.value.trim();
+        if (val) showTopics(val);
     });
 
     input.addEventListener("keydown", function (e) {
@@ -169,18 +446,18 @@ function initAutocomplete() {
             activeIndex = Math.max(activeIndex - 1, 0);
         } else if (e.key === "Enter" && activeIndex >= 0) {
             e.preventDefault();
-            input.value = items[activeIndex].textContent.trim();
+            const selected = items[activeIndex].textContent.trim();
+            input.value = selected;
             list.classList.remove("open");
             activeIndex = -1;
+            showTopics(selected);   // ← trigger topics
             return;
         } else if (e.key === "Escape") {
             list.classList.remove("open");
             return;
         }
 
-        items.forEach((item, i) => {
-            item.classList.toggle("active", i === activeIndex);
-        });
+        items.forEach((item, i) => item.classList.toggle("active", i === activeIndex));
     });
 
     document.addEventListener("click", function (e) {
@@ -188,6 +465,96 @@ function initAutocomplete() {
             list.classList.remove("open");
         }
     });
+}
+
+
+// ── SHOW TOPIC CHIPS ──────────────────────────────────
+function showTopics(subjectName) {
+    const key      = subjectName.toLowerCase().trim();
+    const section  = document.getElementById("topicSection");
+    const chipsEl  = document.getElementById("topicChips");
+    const preview  = document.getElementById("selectedTopicsPreview");
+
+    // Find matching topic list
+    let topics = null;
+
+    // Check detailed SUBJECT_TOPICS first
+    for (const k of Object.keys(SUBJECT_TOPICS)) {
+        if (key.includes(k) || k.includes(key)) {
+            topics = SUBJECT_TOPICS[k].topics;
+            break;
+        }
+    }
+
+    // Fall back to GENERIC_TOPICS
+    if (!topics) {
+        for (const k of Object.keys(GENERIC_TOPICS)) {
+            if (key.includes(k) || k.includes(key)) {
+                topics = GENERIC_TOPICS[k];
+                break;
+            }
+        }
+    }
+
+    if (!topics || topics.length === 0) {
+        section.style.display = "none";
+        return;
+    }
+
+    // Render chips
+    chipsEl.innerHTML = "";
+    preview.style.display = "none";
+
+    topics.forEach(topic => {
+        const chip = document.createElement("span");
+        chip.className     = "topic-chip";
+        chip.dataset.topic = topic;
+        chip.textContent   = topic;
+
+        chip.addEventListener("click", function () {
+            this.classList.toggle("selected");
+            updateTopicPreview(subjectName);
+        });
+
+        chipsEl.appendChild(chip);
+    });
+
+    section.style.display = "block";
+}
+
+
+// ── UPDATE PREVIEW ────────────────────────────────────
+function updateTopicPreview(subjectName) {
+    const selected = [...document.querySelectorAll(".topic-chip.selected")]
+        .map(el => el.dataset.topic);
+    const preview  = document.getElementById("selectedTopicsPreview");
+    const previewT = document.getElementById("topicPreviewText");
+
+    if (selected.length === 0) {
+        preview.style.display = "none";
+        return;
+    }
+
+    const key = subjectName.toLowerCase().trim();
+    const stepsPreview = [];
+
+    for (const k of Object.keys(SUBJECT_TOPICS)) {
+        if (key.includes(k) || k.includes(key)) {
+            selected.forEach(topic => {
+                const topicSteps = SUBJECT_TOPICS[k].steps[topic];
+                if (topicSteps && topicSteps[0]) {
+                    stepsPreview.push(`<strong>${topic}</strong> → ${topicSteps[0]}`);
+                }
+            });
+            break;
+        }
+    }
+
+    previewT.innerHTML = stepsPreview.length > 0
+        ? stepsPreview.join("  •  ")
+        : `Selected: ${selected.join(", ")}`;
+
+    preview.style.display = "flex";
 }
 
 
@@ -201,11 +568,11 @@ async function loadSessions() {
         const completed = sessions.filter(s => s.completed).length;
         const percent   = total ? Math.round(completed / total * 100) : 0;
 
-        document.getElementById("statTotal").textContent   = total;
-        document.getElementById("statDone").textContent    = completed;
-        document.getElementById("statPercent").textContent = percent + "%";
-        document.getElementById("mainProgressBar").style.width = percent + "%";
-        document.getElementById("progressLabel").textContent = total
+        document.getElementById("statTotal").textContent        = total;
+        document.getElementById("statDone").textContent         = completed;
+        document.getElementById("statPercent").textContent      = percent + "%";
+        document.getElementById("mainProgressBar").style.width  = percent + "%";
+        document.getElementById("progressLabel").textContent    = total
             ? `${completed} of ${total} sessions completed — keep going! 💪`
             : "Start by adding a subject below";
 
@@ -319,11 +686,17 @@ function renderTimetable(timetable) {
                 "Low":      "badge-low",
             }[entry.priority] || "badge-low";
 
+            // Show topics badge if present
+            const topicsBadge = entry.topics && entry.topics.length > 0
+                ? `<span class="topics-badge">🎯 ${entry.topics.join(", ")}</span>`
+                : "";
+
             card.innerHTML = `
                 <div class="session-main" onclick="toggleSession(this)">
                     <span class="session-time-badge">⏰ ${entry.start_time} → ${entry.end_time}</span>
                     <span class="session-subject-name">${entry.subject}</span>
                     <div class="session-meta">
+                        ${topicsBadge}
                         <span class="badge ${urgClass}">${entry.priority}</span>
                         <span class="badge ${diffClass}">${diffLabel}</span>
                         <span class="session-hrs">${entry.hours}h</span>
@@ -445,7 +818,7 @@ async function editSubject(subjectId, currentName, currentDiff) {
                 "X-CSRFToken": getCookie("csrftoken"),
             },
             body: JSON.stringify({
-                name: newName.trim(),
+                name:       newName.trim(),
                 difficulty: parseInt(newDiff),
             }),
         });
@@ -506,7 +879,6 @@ async function loadChartData() {
         const res = await fetch("/api/sessions/");
         if (!res.ok) return;
         const sessions = await res.json();
-
         if (sessions.length === 0) return;
 
         const bySubject = {};
@@ -523,11 +895,7 @@ async function loadChartData() {
             Math.round(bySubject[n].completed / bySubject[n].total * 100)
         );
 
-        const colors = [
-            "#ff6b6b","#52d9a6","#5eb8ff",
-            "#ffd166","#a78bfa","#ff8fab",
-            "#ffa07a","#47ffd4",
-        ];
+        const colors = ["#ff6b6b","#52d9a6","#5eb8ff","#ffd166","#a78bfa","#ff8fab","#ffa07a","#47ffd4"];
 
         const total     = sessions.length;
         const completed = sessions.filter(s => s.completed).length;
@@ -558,16 +926,9 @@ async function loadChartData() {
                 cutout: "72%",
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${ctx.label}: ${ctx.raw}% done`
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}% done` } }
                 },
-                animation: {
-                    animateRotate: true,
-                    duration: 800,
-                }
+                animation: { animateRotate: true, duration: 800 }
             }
         });
 
