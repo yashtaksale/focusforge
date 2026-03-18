@@ -18,11 +18,11 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/github/stars/your-username/focusforge?style=social"/>
+  <img src="https://img.shields.io/github/stars/yashtaksale/focusforge?style=social"/>
   &nbsp;
-  <img src="https://img.shields.io/github/forks/your-username/focusforge?style=social"/>
+  <img src="https://img.shields.io/github/forks/yashtaksale/focusforge?style=social"/>
   &nbsp;
-  <img src="https://img.shields.io/github/watchers/your-username/focusforge?style=social"/>
+  <img src="https://img.shields.io/github/watchers/yashtaksale/focusforge?style=social"/>
 </p>
 
 </div>
@@ -261,7 +261,7 @@ User
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/focusforge.git
+git clone https://github.com/yashtaksale/focusforge.git
 cd focusforge/studyplanner
 
 # 2. Create and activate virtual environment
@@ -342,7 +342,7 @@ focusforge/
 <td align="center">
   <b>Yash Taksale</b><br/>
   Computer Science Engineering<br/><br/>
-  <a href="https://github.com/your-username">
+  <a href="https://github.com/yashtaksale">
     <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/>
   </a>
   &nbsp;
