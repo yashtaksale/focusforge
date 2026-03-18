@@ -22,5 +22,3 @@ urlpatterns = [
         name="logout",
     ),
 ]
-
-# ← removed the DEBUG check, whitenoise handles static on Render
