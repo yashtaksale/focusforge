@@ -750,20 +750,22 @@ function catReact(phoneFound, personGone) {
 
 // ── MUSIC ──────────────────────────────────────────────────────
 function toggleMusic() {
-  const m = document.getElementById('lofiMusic');
+  const m   = document.getElementById('lofiMusic');
   const btn = document.getElementById('musicBtn');
   const eq  = document.getElementById('eqBars');
   if (!musicPlaying) {
-    try {
-    await m.play();
-    } catch (e) {
-    alert("Click anywhere first to enable audio 🎵");
-}
-    musicPlaying = true; btn.textContent = '⏸';
-    document.getElementById('musicStatus').textContent = 'Lofi playing';
-    eq.classList.add('active');
+    m.play().then(() => {
+      musicPlaying = true;
+      btn.textContent = '⏸';
+      document.getElementById('musicStatus').textContent = 'Lofi playing';
+      eq.classList.add('active');
+    }).catch(() => {
+      alert("Click anywhere first to enable audio 🎵");
+    });
   } else {
-    m.pause(); musicPlaying = false; btn.textContent = '▶';
+    m.pause();
+    musicPlaying = false;
+    btn.textContent = '▶';
     document.getElementById('musicStatus').textContent = 'Lofi beats';
     eq.classList.remove('active');
   }
