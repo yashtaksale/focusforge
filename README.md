@@ -2,244 +2,196 @@
 
 > **Build Discipline. Eliminate Distractions. Execute Consistently.**
 
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-6.0-092E20?style=flat-square&logo=django&logoColor=white)](https://djangoproject.com)
-[![DRF](https://img.shields.io/badge/Django_REST_Framework-3.15-red?style=flat-square)](https://www.django-rest-framework.org)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django&logoColor=white"/>
+  <img src="https://img.shields.io/badge/DRF-3.15-red?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/AI-TensorFlow.js-orange?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge"/>
+</p>
+
+---
+
+## 🚀 Live Preview (Coming Soon)
+
+> 🌐 Deployment in progress (Render / AWS)
 
 ---
 
 ## 🧠 What is FocusForge?
 
-Most students don't fail because they lack knowledge — **they fail because of poor planning and constant distractions.**
+Most students don’t fail because they lack knowledge —
+they fail because of **poor planning + distractions**.
 
-FocusForge is a production-grade, AI-powered study planner that solves exactly that. It generates intelligent, **priority-weighted timetables**, tracks your study progress in real time, and includes a **Deep Focus Mode** with live phone detection to keep you locked in.
+**FocusForge** is a production-grade AI-powered study planner that:
 
-Built for students who take their work seriously.
+* Generates **priority-based timetables**
+* Tracks **real-time study progress**
+* Uses **AI-powered phone detection** to eliminate distractions
+
+> ⚡ This is not just a planner — it's a **discipline engine**
+
+---
+
+## 🖼 Screenshots
+
+>
+
+###  Dashboard
+
+<img width="1919" height="1079" alt="Dashboard" src="https://github.com/user-attachments/assets/f10111b6-950a-4c08-bdb4-c6edd97c86a0" />
+
+
+###  Deep Focus Mode
+
+https://github.com/user-attachments/assets/b1ad0ed7-758e-4e51-9f1d-96880af3dce5
+
+
+### 📅 Generated Timetable
+
+<img width="1919" height="1079" alt="Generated Timetable" src="https://github.com/user-attachments/assets/9424197b-e572-48ad-91fc-242eda8e9cc5" />
+
 
 ---
 
 ## ✨ Key Features
 
 ### 📅 Smart Scheduling Engine
-Automatically generates a full study timetable based on your subjects, exam dates, and difficulty levels. Each session is allocated a specific time slot with an approach strategy and step-by-step study actions.
+
+Automatically generates optimized study schedules based on:
+
+* Subject difficulty
+* Exam deadlines
+* Available study hours
+
+---
 
 ### ⚡ Priority-Weighted Algorithm
-The core algorithm calculates a `priority_score` for each subject using difficulty and time sensitivity, so your schedule always puts the most critical work first.
 
-### 🧠 Study Strategy Engine
-Detects the type of subject (Coding, Mathematics, Theory, etc.) and generates a tailored learning approach — not just hours, but *how* to use them.
+```python
+priority_score = difficulty_weight × time_sensitivity_factor
+```
 
-### 🔴 Deep Focus Mode
-A dedicated focus page with live webcam-based **phone detection** powered by TensorFlow.js + COCO-SSD. If you pick up your phone, the system detects it and alerts you instantly. Includes a session timer and distraction counter.
+Ensures:
+
+* Hard + urgent subjects → more time
+* Easy + distant subjects → balanced scheduling
+
+---
+
+### 🔴 Deep Focus Mode (AI Powered)
+
+* 📷 Webcam-based **phone detection**
+* 🚨 Real-time distraction alerts
+* ⏱ Session timer + distraction counter
+
+---
 
 ### 📊 Progress Dashboard
-Visual doughnut chart with per-subject completion bars. See your overall progress and daily stats at a glance.
 
-### 🔔 Smart Study Reminders
-Browser notifications scheduled to fire 30 min, 10 min, 5 min, and exactly when each session starts.
+* Visual charts (Chart.js)
+* Subject-wise completion tracking
+* Daily productivity insights
+
+---
+
+### 🔔 Smart Notifications
+
+* Reminders at:
+
+  * 30 min
+  * 10 min
+  * 5 min
+  * Session start
+
+---
 
 ### 🔐 Secure Authentication
-Django session-based login/logout with per-user data isolation.
+
+* Django session-based auth
+* Per-user data isolation
 
 ---
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Backend | Django 6.0 + Django REST Framework |
-| Database | SQLite (dev) / PostgreSQL (prod-ready) |
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
-| Charts | Chart.js 4.4 |
-| AI / Detection | TensorFlow.js + COCO-SSD |
-| Fonts & Icons | Google Fonts (Nunito), Font Awesome 6 |
-| Config | python-dotenv |
+| Layer    | Technology               |
+| -------- | ------------------------ |
+| Backend  | Django 6.0 + DRF         |
+| Frontend | HTML, CSS, JavaScript    |
+| Database | SQLite / PostgreSQL      |
+| AI       | TensorFlow.js + COCO-SSD |
+| Charts   | Chart.js                 |
 
 ---
 
 ## 🏗 Architecture
 
 ```
-Browser (HTML/CSS/JS)
-        │
-        ▼
-  Django REST API          ← clean separation of concerns
-        │
-        ▼
-  Service Layer            ← scheduling algorithm lives here
-  (services.py)
-        │
-        ▼
-   SQLite Database
+Frontend (Browser)
+        ↓
+Django REST API
+        ↓
+Service Layer (Algorithm)
+        ↓
+Database
 ```
 
-The frontend is fully decoupled from the backend — all communication happens through REST API calls, making the system easy to scale or swap frontends.
+> Clean, scalable, and production-ready architecture
 
 ---
 
-## 🧮 Core Algorithm
-
-FocusForge uses a **priority-weighted scheduling algorithm** to decide how much time and urgency to assign each subject.
-
-```
-priority_score = difficulty_weight × time_sensitivity_factor
-```
-
-**Difficulty weights:**
-
-| Level  | Weight |
-|--------|--------|
-| Easy   | 1.0×   |
-| Medium | 2.0×   |
-| Hard   | 3.5×   |
-
-**Time sensitivity:**
-
-| Days to Exam | Multiplier |
-|---|---|
-| ≤ 3 days | 1.5× (Critical) |
-| ≤ 7 days | 1.2× (High) |
-| > 7 days | 1.0× (Normal) |
-
-**Result:** Urgent + difficult subjects automatically receive more sessions, earlier slots, and a harder study approach. Easier subjects with distant exams are scheduled without panic.
-
----
-
-## 📡 API Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/subjects/` | List all subjects |
-| `POST` | `/api/subjects/` | Add a new subject |
-| `PUT` | `/api/subjects/<id>/` | Update subject |
-| `DELETE` | `/api/subjects/<id>/` | Delete subject |
-| `POST` | `/api/generate/` | Generate timetable |
-| `GET` | `/api/sessions/` | Get all sessions |
-| `PATCH` | `/api/sessions/<id>/complete/` | Mark session complete |
-| `GET` | `/api/progress/` | Overall progress stats |
-| `GET` | `/api/timetable/export_pdf/` | Export PDF |
-
----
-
-## 🗃 Data Model
-
-```
-User
- └── Subject
-      ├── name
-      ├── exam_date
-      ├── difficulty          (1=Easy, 2=Medium, 3=Hard)
-      ├── syllabus_completion
-      ├── selected_topics     (JSON)
-      ├── study_start_time
-      └── study_end_time
-           │
-           ▼
-      StudySession
-        ├── date
-        ├── start_time / end_time
-        ├── hours_allocated
-        ├── priority_label    (Critical / High / Medium / Low)
-        ├── approach
-        ├── technique
-        ├── steps             (JSON)
-        └── completed
-```
-
----
-
-## ⚙️ Installation & Setup
+## ⚙️ Installation
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/your-username/focusforge.git
 cd focusforge/studyplanner
 
-# 2. Create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+venv\Scripts\activate   # Windows
 
-# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Set up environment variables
-echo "SECRET_KEY=your-secret-key-here" > .env
-echo "DEBUG=True" >> .env
-
-# 5. Run migrations
 python manage.py migrate
-
-# 6. Create a superuser (optional)
-python manage.py createsuperuser
-
-# 7. Start the server
 python manage.py runserver
 ```
-
-Open **http://localhost:8000** and register an account to get started.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-focusforge/
-├── manage.py
-├── requirements.txt
-├── .env
-│
-├── planner/                  ← main app
-│   ├── models.py             ← Subject, StudySession
-│   ├── serializers.py        ← DRF serializers
-│   ├── views.py              ← API views
-│   ├── services.py           ← scheduling algorithm
-│   ├── urls.py
-│   └── tests.py
-│
-├── studyplanner/             ← project config
-│   ├── settings.py
-│   └── urls.py
-│
-├── templates/
-│   ├── index.html            ← main dashboard
-│   ├── focus.html            ← deep focus mode
-│   └── login.html
-│
-└── static/
-    ├── css/style.css
-    └── js/script.js
-```
-
----
-
-## 🧪 Running Tests
-
-```bash
-python manage.py test planner
+planner/        → core logic
+services.py     → scheduling algorithm
+templates/      → frontend UI
+static/         → CSS & JS
 ```
 
 ---
 
 ## 🗺 Roadmap
 
-- [x] Priority-weighted timetable generation
-- [x] Deep Focus Mode with phone detection
-- [x] Progress dashboard with charts
-- [x] Browser push notifications
-- [x] PDF export
-- [ ] AI-powered topic recommendations
-- [ ] Mobile app (React Native)
-- [ ] Cloud deployment (Render / AWS)
-- [ ] Advanced analytics — predicted exam readiness score
-- [ ] Collaborative study rooms
+* [x] AI-based timetable generation
+* [x] Deep Focus Mode
+* [x] Progress tracking
+* [x] Notifications
+* [ ] Mobile App (React Native)
+* [ ] Cloud Deployment
+* [ ] AI Recommendations
 
 ---
 
 ## 👨‍💻 Author
 
-**Yash Taksale** — Computer Science Engineering
+**Yash Taksale**
+Computer Science Engineering Student
 
 ---
 
-> ⭐ If FocusForge helped you, give it a star — it means a lot and helps others find it!
+## ⭐ Support
+
+If you found this useful:
+👉 Star this repo
+👉 Share with friends
+
+> Discipline beats motivation. FocusForge builds discipline.
