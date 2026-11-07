@@ -46,9 +46,9 @@ class SubjectSerializer(serializers.ModelSerializer):
             )
         start = attrs.get("study_start_time")
         end   = attrs.get("study_end_time")
-        if start and end and start >= end:
+        if start and end and start == end:
             raise serializers.ValidationError(
-                {"study_end_time": "End time must be after start time."}
+                {"study_end_time": "Start time and end time cannot be identical."}
             )
         return attrs
 
@@ -58,6 +58,7 @@ class StudySessionSerializer(serializers.ModelSerializer):
     subject_id     = serializers.IntegerField(source="subject.id",          read_only=True)
     difficulty     = serializers.IntegerField(source="subject.difficulty",   read_only=True)
     priority_label = serializers.CharField(source="subject.priority_label", read_only=True)
+    topics         = serializers.JSONField(source="subject.selected_topics", read_only=True)
 
     class Meta:
         model  = StudySession
@@ -65,7 +66,7 @@ class StudySessionSerializer(serializers.ModelSerializer):
             "id", "subject", "subject_id", "subject_name",
             "date", "hours_allocated", "difficulty",
             "completed", "completed_at",
-            "priority_label", "notes",
+            "priority_label", "notes", "topics",
         ]
         read_only_fields = ["id", "completed_at"]
 

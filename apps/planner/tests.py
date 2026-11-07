@@ -2,7 +2,9 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
+from datetime import time, date, timedelta
 from .models import Subject, StudySession
+from .services import _assign_time_slots, generate_timetable
 
 
 class TimetableTests(TestCase):
@@ -22,7 +24,9 @@ class TimetableTests(TestCase):
             exam_date="2099-12-31",
             difficulty=1,
             syllabus_completion=0,
-            daily_hours_available=2
+            daily_hours_available=2,
+            study_start_time=time(9, 0),
+            study_end_time=time(13, 0)
         )
 
         self.sub2 = Subject.objects.create(
@@ -31,7 +35,9 @@ class TimetableTests(TestCase):
             exam_date="2099-12-31",
             difficulty=3,
             syllabus_completion=0,
-            daily_hours_available=4
+            daily_hours_available=4,
+            study_start_time=time(9, 0),
+            study_end_time=time(13, 0)
         )
 
     def test_daily_progress_endpoint(self):
@@ -82,7 +88,22 @@ class TimetableTests(TestCase):
         weights = _compute_subject_weights([self.sub1, self.sub2])
         self.assertGreater(weights[self.sub2.id], weights[self.sub1.id])
 
-    def test_unauthenticated_request_blocked(self):
+    def test_no_login_request_allowed(self):
         unauthenticated = APIClient()
         response = unauthenticated.get(reverse("sessions"))
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 200)
+
+    def test_overnight_time_slots(self):
+        overnight_sub = Subject.objects.create(
+            user=self.user,
+            name="NightStudy",
+            exam_date=date.today() + timedelta(days=5),
+            difficulty=2,
+            daily_hours_available=3,
+            study_start_time=time(22, 0),
+            study_end_time=time(2, 0)
+        )
+        slots = _assign_time_slots([(overnight_sub, 2.0)], 0)
+        self.assertEqual(len(slots), 1)
+        self.assertEqual(slots[0][1], time(22, 0))
+        self.assertEqual(slots[0][2], time(0, 0))

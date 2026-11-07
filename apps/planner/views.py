@@ -4,13 +4,12 @@ from datetime import date
 from io import BytesIO
 
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.http import HttpResponse
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from reportlab.lib.pagesizes import A4
@@ -29,17 +28,25 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
-@login_required
 def home_page(request):
     return render(request, "index.html")
 
 
 @api_view(["GET", "POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def subjects(request):
     if request.method == "GET":
         qs = Subject.objects.filter(user=request.user)
         return Response(SubjectSerializer(qs, many=True).data)
+
+    name = request.data.get("name", "").strip()
+    existing = Subject.objects.filter(user=request.user, name__iexact=name).first()
+    if existing:
+        serializer = SubjectSerializer(existing, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = SubjectSerializer(data=request.data)
     if serializer.is_valid():
@@ -50,7 +57,7 @@ def subjects(request):
 
 # ─── Timetable Generation ──────────────────────────────────────
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def generate_plan(request):
     result = generate_timetable(request.user)
 
@@ -61,7 +68,7 @@ def generate_plan(request):
     }
     if result["skipped_subjects"]:
         response_data["warning"] = (
-            f"Skipped subjects with no exam date: "
+            f"Skipped subjects with past exam date: "
             f"{', '.join(result['skipped_subjects'])}"
         )
 
@@ -70,11 +77,11 @@ def generate_plan(request):
 
 # ─── Sessions ─────────────────────────────────────────────────
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def get_sessions(request):
     qs = StudySession.objects.filter(
         subject__user=request.user
-    ).select_related("subject").order_by("date")
+    ).select_related("subject").order_by("date", "id")
 
     date_str = request.GET.get("date")
     if date_str:
@@ -82,26 +89,30 @@ def get_sessions(request):
 
     return Response(StudySessionSerializer(qs, many=True).data)
 
-@api_view(["PATCH"])
-@permission_classes([IsAuthenticated])
-def mark_completed(request, session_id):
-    from django.utils import timezone
 
+@api_view(["PATCH"])
+@permission_classes([AllowAny])
+def mark_completed(request, session_id):
     session = get_object_or_404(
         StudySession,
         id=session_id,
         subject__user=request.user
     )
 
-    session.completed = True
-    session.completed_at = timezone.now()
+    # Allow toggling completion
+    session.completed = not session.completed
+    session.completed_at = timezone.now() if session.completed else None
     session.save(update_fields=["completed", "completed_at"])
 
-    return Response({"message": "Session marked as completed"})
+    return Response({
+        "message": f"Session marked as {'completed' if session.completed else 'pending'}",
+        "completed": session.completed,
+    })
+
 
 # ─── Progress ─────────────────────────────────────────────────
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def progress(request):
     qs = StudySession.objects.filter(subject__user=request.user)
 
@@ -122,7 +133,7 @@ def progress(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def daily_progress(request):
     stats = (
         StudySession.objects
@@ -149,7 +160,6 @@ def daily_progress(request):
 
 
 # ─── PDF Export ───────────────────────────────────────────────
-@login_required
 def export_pdf(request):
     sessions = (
         StudySession.objects
@@ -162,8 +172,8 @@ def export_pdf(request):
     doc    = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        rightMargin=20*mm, leftMargin=20*mm,
-        topMargin=20*mm,   bottomMargin=20*mm,
+        rightMargin=15*mm, leftMargin=15*mm,
+        topMargin=15*mm,   bottomMargin=15*mm,
     )
 
     styles = getSampleStyleSheet()
@@ -196,16 +206,31 @@ def export_pdf(request):
         spaceBefore=12,
         spaceAfter=6,
     )
+    cell_style = ParagraphStyle(
+        "Cell",
+        parent=styles["Normal"],
+        fontSize=8,
+        fontName="Helvetica",
+        alignment=TA_CENTER,
+    )
+    cell_bold = ParagraphStyle(
+        "CellBold",
+        parent=styles["Normal"],
+        fontSize=8,
+        fontName="Helvetica-Bold",
+        alignment=TA_CENTER,
+    )
 
     story = []
+    username = request.user.username if getattr(request, "user", None) and request.user.is_authenticated else "Student"
 
     # Header
-    story.append(Paragraph("📚 StudyBuddy", title_style))
-    story.append(Paragraph(f"Study Plan for {request.user.username}", sub_style))
+    story.append(Paragraph("FocusForge Study Plan", title_style))
+    story.append(Paragraph(f"Study Plan for {username}", sub_style))
     story.append(Paragraph(f"Generated on {date.today().strftime('%B %d, %Y')}", sub_style))
-    story.append(Spacer(1, 6*mm))
+    story.append(Spacer(1, 4*mm))
     story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor("#ff6b6b")))
-    story.append(Spacer(1, 6*mm))
+    story.append(Spacer(1, 4*mm))
 
     # Group sessions by date
     by_date = {}
@@ -219,59 +244,49 @@ def export_pdf(request):
         story.append(Paragraph("No sessions found. Add subjects and generate a plan first!", styles["Normal"]))
     else:
         for date_str, day_sessions in by_date.items():
-            # Day header
             try:
                 from datetime import datetime
                 d = datetime.strptime(date_str, "%Y-%m-%d")
                 day_label = d.strftime("%A, %B %d %Y")
-            except:
+            except Exception:
                 day_label = date_str
 
-            story.append(Paragraph(f"📅 {day_label}", section_style))
+            story.append(Paragraph(f"Schedule: {day_label}", section_style))
 
-            # Table for this day
             table_data = [["Time Slot", "Subject", "Hours", "Difficulty", "Urgency", "Status"]]
-
             diff_map   = {1: "Easy", 2: "Medium", 3: "Hard"}
-            status_map = {True: "✅ Done", False: "⬜ Pending"}
+            status_map = {True: "Completed", False: "Pending"}
 
             for s in day_sessions:
                 table_data.append([
-                    s.notes or "—",
-                    s.subject.name,
-                    f"{s.hours_allocated}h",
-                    diff_map.get(s.subject.difficulty, "Medium"),
-                    s.subject.priority_label,
-                    status_map[s.completed],
+                    Paragraph(s.notes or "—", cell_style),
+                    Paragraph(s.subject.name, cell_bold),
+                    Paragraph(f"{s.hours_allocated}h", cell_style),
+                    Paragraph(diff_map.get(s.subject.difficulty, "Medium"), cell_style),
+                    Paragraph(s.subject.priority_label, cell_style),
+                    Paragraph(status_map[s.completed], cell_style),
                 ])
 
-            col_widths = [42*mm, 40*mm, 15*mm, 22*mm, 22*mm, 22*mm]
+            col_widths = [45*mm, 45*mm, 18*mm, 24*mm, 24*mm, 24*mm]
             table = Table(table_data, colWidths=col_widths, repeatRows=1)
             table.setStyle(TableStyle([
-                # Header row
                 ("BACKGROUND",   (0,0), (-1,0), colors.HexColor("#ff6b6b")),
                 ("TEXTCOLOR",    (0,0), (-1,0), colors.white),
                 ("FONTNAME",     (0,0), (-1,0), "Helvetica-Bold"),
                 ("FONTSIZE",     (0,0), (-1,0), 9),
-                ("ALIGN",        (0,0), (-1,0), "CENTER"),
+                ("ALIGN",        (0,0), (-1,-1), "CENTER"),
+                ("VALIGN",       (0,0), (-1,-1), "MIDDLE"),
                 ("BOTTOMPADDING",(0,0), (-1,0), 6),
                 ("TOPPADDING",   (0,0), (-1,0), 6),
-                # Data rows
-                ("FONTNAME",     (0,1), (-1,-1), "Helvetica"),
-                ("FONTSIZE",     (0,1), (-1,-1), 8),
-                ("ALIGN",        (0,1), (-1,-1), "CENTER"),
                 ("ROWBACKGROUNDS",(0,1),(-1,-1), [colors.HexColor("#fff9f4"), colors.white]),
                 ("TOPPADDING",   (0,1), (-1,-1), 5),
                 ("BOTTOMPADDING",(0,1), (-1,-1), 5),
-                # Grid
                 ("GRID",         (0,0), (-1,-1), 0.5, colors.HexColor("#f0e6d8")),
-                ("ROUNDEDCORNERS", [4]),
             ]))
 
             story.append(table)
             story.append(Spacer(1, 4*mm))
 
-    # Summary footer
     total     = sessions.count()
     completed = sessions.filter(completed=True).count()
     percent   = round(completed / total * 100) if total else 0
@@ -279,7 +294,7 @@ def export_pdf(request):
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#f0e6d8")))
     story.append(Spacer(1, 4*mm))
     story.append(Paragraph(
-        f"📊 Summary: {completed}/{total} sessions completed ({percent}%)",
+        f"Summary: {completed}/{total} sessions completed ({percent}%)",
         ParagraphStyle("footer", parent=styles["Normal"], fontSize=10,
                        fontName="Helvetica-Bold", textColor=colors.HexColor("#7a6652"),
                        alignment=TA_CENTER)
@@ -289,12 +304,13 @@ def export_pdf(request):
     buffer.seek(0)
 
     response = HttpResponse(buffer, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="studybuddy_plan_{request.user.username}.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="study_plan_{username}.pdf"'
     return response
+
 
 # ─── Subject Detail (Edit / Delete) ───────────────────────────
 @api_view(["GET", "PUT", "DELETE"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def subject_detail(request, subject_id):
     subject = get_object_or_404(Subject, id=subject_id, user=request.user)
 
@@ -311,7 +327,7 @@ def subject_detail(request, subject_id):
     if request.method == "DELETE":
         subject.delete()
         return Response({"message": "Subject deleted"}, status=status.HTTP_204_NO_CONTENT)
-    
+
 
 def focus_page(request):
     subject = request.GET.get("subject", "Study Session")

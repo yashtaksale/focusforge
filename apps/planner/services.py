@@ -221,9 +221,7 @@ def get_concentration_factor(days_until_exam: int) -> float:
 
 
 def calculate_priority(subject) -> float:
-    days_left = subject.days_left
-    if not days_left or days_left <= 0:
-        return 0.0
+    days_left = max(subject.days_left, 1)
     return round(
         (10 / days_left)
         + (subject.difficulty * 2)
@@ -236,7 +234,7 @@ def _compute_subject_weights(subjects) -> dict:
     return {
         s.id: DIFFICULTY_MULTIPLIERS.get(s.difficulty, 1.0) * s.daily_hours_available
         for s in subjects
-        if s.days_left > 0
+        if max(s.days_left, 1) > 0
     }
 
 
@@ -263,7 +261,7 @@ def _build_slots_for_subject(subject) -> list:
 def _assign_time_slots(day_subjects, day_offset):
     """
     Create sequential time slots for subjects in a single day.
-    Prevents overlapping sessions.
+    Prevents overlapping sessions and handles overnight windows safely.
     """
 
     sessions = []
@@ -282,6 +280,10 @@ def _assign_time_slots(day_subjects, day_offset):
     current_dt = datetime.combine(date.today(), start_time)
     end_limit  = datetime.combine(date.today(), end_time)
 
+    # Handle overnight study window, e.g. 10:00 PM -> 02:00 AM
+    if end_limit <= current_dt:
+        end_limit += timedelta(days=1)
+
     for subject, hours in day_subjects:
 
         if hours <= 0:
@@ -289,8 +291,11 @@ def _assign_time_slots(day_subjects, day_offset):
 
         end_dt = current_dt + timedelta(hours=hours)
 
-        # Stop if outside study window
+        # If outside window, allocate available remaining hours if meaningful
         if end_dt > end_limit:
+            avail_hours = (end_limit - current_dt).total_seconds() / 3600
+            if avail_hours >= 0.25:
+                sessions.append((subject, current_dt.time(), end_limit.time(), round(avail_hours, 2)))
             break
 
         sessions.append((subject, current_dt.time(), end_dt.time(), hours))
@@ -398,17 +403,17 @@ def generate_timetable(user) -> dict:
     if not valid_subjects:
         return {"sessions_created": 0, "skipped_subjects": skipped, "timetable": []}
 
-    max_days = max(s.days_left for s in valid_subjects)
+    max_days = max(max(s.days_left, 1) for s in valid_subjects)
     if max_days <= 0:
         return {"sessions_created": 0, "skipped_subjects": skipped, "timetable": []}
 
     sessions_to_create = []
-    timetable_preview  = []
+    preview_items      = []
     today = date.today()
 
     for day_offset in range(max_days):
         current_date    = today + timedelta(days=day_offset)
-        active_subjects = [s for s in valid_subjects if s.days_left > day_offset]
+        active_subjects = [s for s in valid_subjects if max(s.days_left, 1) > day_offset]
         if not active_subjects:
             continue
 
@@ -421,21 +426,20 @@ def generate_timetable(user) -> dict:
             base_hours      = (weight / total_weight * subject.daily_hours_available
                                if total_weight else
                                subject.daily_hours_available / len(active_subjects))
-            days_until_exam = subject.days_left - day_offset
+            days_until_exam = max(subject.days_left - day_offset, 0)
             final_hours     = round(base_hours * get_concentration_factor(days_until_exam), 2)
             day_subjects.append((subject, final_hours))
 
         assignments = _assign_time_slots(day_subjects, day_offset)
 
         for subject, start_time, end_time, hours in assignments:
-            sessions_to_create.append(
-                StudySession(
-                    subject=subject,
-                    date=current_date,
-                    hours_allocated=hours,
-                    notes=f"{start_time.strftime('%I:%M %p')} – {end_time.strftime('%I:%M %p')}",
-                )
+            sess = StudySession(
+                subject=subject,
+                date=current_date,
+                hours_allocated=hours,
+                notes=f"{start_time.strftime('%I:%M %p')} – {end_time.strftime('%I:%M %p')}",
             )
+            sessions_to_create.append(sess)
 
             if day_offset < 14:
                 approach = get_study_approach(
@@ -444,12 +448,12 @@ def generate_timetable(user) -> dict:
                     day_offset,
                     selected_topics=subject.selected_topics or [],
                 )
-                timetable_preview.append({
+                preview_items.append((sess, {
                     "date":       current_date.strftime("%d %b %Y"),
                     "day":        current_date.strftime("%A"),
                     "subject":    subject.name,
                     "priority":   subject.priority_label,
-                    "days_left":  subject.days_left - day_offset,
+                    "days_left":  max(subject.days_left - day_offset, 0),
                     "start_time": start_time.strftime("%I:%M %p"),
                     "end_time":   end_time.strftime("%I:%M %p"),
                     "hours":      hours,
@@ -458,9 +462,15 @@ def generate_timetable(user) -> dict:
                     "steps":      approach["steps"],
                     "difficulty": subject.difficulty,
                     "topics":     subject.selected_topics or [],
-                })
+                    "completed":  False,
+                }))
 
     StudySession.objects.bulk_create(sessions_to_create)
+
+    timetable_preview = []
+    for sess, data in preview_items:
+        data["id"] = sess.id
+        timetable_preview.append(data)
 
     return {
         "sessions_created": len(sessions_to_create),

@@ -61,12 +61,19 @@ class Subject(models.Model):
         ]
 
     @property
+    def exam_date_obj(self):
+        if isinstance(self.exam_date, str):
+            from datetime import datetime
+            return datetime.strptime(self.exam_date, "%Y-%m-%d").date()
+        return self.exam_date
+
+    @property
     def days_left(self):
-        return max((self.exam_date - date.today()).days, 0)
+        return max((self.exam_date_obj - date.today()).days, 0)
 
     @property
     def is_exam_passed(self):
-        return self.exam_date < date.today()
+        return self.exam_date_obj < date.today()
 
     @property
     def priority_label(self):
