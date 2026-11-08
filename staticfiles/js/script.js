@@ -269,7 +269,20 @@ function escapeHTML(str) {
 }
 
 
+function getLocalDateString(d = new Date()) {
+    const year  = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day   = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+
 document.addEventListener("DOMContentLoaded", function () {
+    const examDateInput = document.getElementById("examDateInput") || document.querySelector('input[name="exam_date"]');
+    if (examDateInput) {
+        examDateInput.min = getLocalDateString();
+    }
+
     loadSessions();
     initAutocomplete();
     initTimeWindow();
@@ -635,13 +648,66 @@ function updateTopicPreview(subjectName) {
 }
 
 
+function getStudyApproachClient(subjectName, difficulty, selectedTopics) {
+    const diffTips = {
+        1: { approach: "Light Review",    technique: "Spaced repetition + quick quizzes" },
+        2: { approach: "Active Learning", technique: "Pomodoro (25min study / 5min break)" },
+        3: { approach: "Deep Work",       technique: "Feynman technique + practice problems" },
+    };
+    const tip = diffTips[difficulty] || diffTips[2];
+
+    const key = (subjectName || "").toLowerCase().trim();
+    let steps = [];
+
+    for (const k of Object.keys(SUBJECT_TOPICS)) {
+        if (key.includes(k) || k.includes(key)) {
+            const stObj = SUBJECT_TOPICS[k];
+            if (selectedTopics && selectedTopics.length > 0) {
+                selectedTopics.forEach(t => {
+                    if (stObj.steps && stObj.steps[t]) {
+                        steps.push(...stObj.steps[t].map(s => `[${t}] ${s}`));
+                    }
+                });
+            }
+            if (steps.length === 0 && stObj.topics) {
+                stObj.topics.slice(0, 3).forEach(t => {
+                    if (stObj.steps && stObj.steps[t]) {
+                        steps.push(...stObj.steps[t].slice(0, 2).map(s => `[${t}] ${s}`));
+                    }
+                });
+            }
+            break;
+        }
+    }
+
+    if (steps.length === 0) {
+        steps = [
+            "Review core concepts and textbook summary",
+            "Solve 3-5 practice questions",
+            "Identify and note down weak areas",
+            "Quick revision of key formulas and terms"
+        ];
+    }
+
+    return {
+        approach:  tip.approach,
+        technique: tip.technique,
+        steps:     steps.slice(0, 4),
+    };
+}
+
+
 async function loadSessions() {
     try {
-        // FIX BUG 1: use correct endpoint /api/sessions/
-        const res = await fetch(`/api/sessions/`);
-        if (!res.ok) return;
+        const [sessRes, subRes] = await Promise.all([
+            fetch("/api/sessions/"),
+            fetch("/api/subjects/"),
+        ]);
+        if (!sessRes.ok) return;
 
-        const sessions  = await res.json();
+        const sessions  = await sessRes.json();
+        const subjects  = subRes.ok ? await subRes.json() : [];
+
         const total     = sessions.length;
         const completed = sessions.filter(s => s.completed).length;
         const percent   = total ? Math.round(completed / total * 100) : 0;
@@ -654,17 +720,9 @@ async function loadSessions() {
             ? `${completed} of ${total} sessions completed — keep going! 💪`
             : "Start by adding a subject below";
 
+        // Render My Subjects List
         const list = document.getElementById("missionList");
         list.innerHTML = "";
-
-        const seen     = {};
-        const subjects = [];
-        sessions.forEach(s => {
-            if (!seen[s.subject_id]) {
-                seen[s.subject_id] = true;
-                subjects.push(s);
-            }
-        });
 
         if (subjects.length === 0) {
             list.innerHTML = `
@@ -672,59 +730,101 @@ async function loadSessions() {
                     <i class="fas fa-seedling"></i>
                     <p>No subjects yet.<br>Add one above to get started! 🌱</p>
                 </li>`;
-            return;
+        } else {
+            subjects.forEach(s => {
+                const li = document.createElement("li");
+                li.className = "mission-item";
+                li.setAttribute("data-sid", String(s.id));
+
+                const diffLabel = ["", "Easy", "Medium", "Hard"][s.difficulty || 2];
+                const diffClass = ["", "badge-easy", "badge-med", "badge-hard"][s.difficulty || 2];
+                const urgClass  = {
+                    "Critical": "badge-critical",
+                    "High":     "badge-high",
+                    "Medium":   "badge-medium",
+                    "Low":      "badge-low",
+                }[s.priority_label] || "badge-low";
+
+                li.innerHTML = `
+                    <div class="mission-left">
+                        <span class="mission-name">${escapeHTML(s.name)}</span>
+                        <span class="badge ${urgClass}">${s.priority_label || "Low"}</span>
+                    </div>
+                    <div class="mission-right">
+                        <span class="mission-date">Exam: ${s.exam_date}</span>
+                        <span class="badge ${diffClass}">${diffLabel}</span>
+                        <button onclick="editSubject(${s.id}, '${escapeHTML(s.name)}', ${s.difficulty || 2})"
+                            class="icon-btn edit-btn" title="Edit">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button onclick="deleteSubject(${s.id})"
+                            class="icon-btn delete-btn" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>`;
+                list.appendChild(li);
+            });
         }
 
-        subjects.forEach(s => {
-            const li = document.createElement("li");
-            li.className = "mission-item" + (s.completed ? " done" : "");
-            li.setAttribute("data-sid", String(s.subject_id));
-
-            const diffLabel = ["", "Easy", "Medium", "Hard"][s.difficulty || 2];
-            const diffClass = ["", "badge-easy", "badge-med", "badge-hard"][s.difficulty || 2];
-            const urgClass  = {
-                "Critical": "badge-critical",
-                "High":     "badge-high",
-                "Medium":   "badge-medium",
-                "Low":      "badge-low",
-            }[s.priority_label] || "badge-low";
-
-            li.innerHTML = `
-                <div class="mission-left">
-                    <input type="checkbox" class="mission-check"
-                        ${s.completed ? "checked" : ""}
-                        onchange="markCompleted(${s.id}, this)">
-                    <span class="mission-name">${s.subject_name}</span>
-                    <span class="badge ${urgClass}">${s.priority_label || "Low"}</span>
-                </div>
-                <div class="mission-right">
-                    <span class="mission-time">${s.notes || ""}</span>
-                    <span class="mission-date">${s.date}</span>
-                    <span class="badge ${diffClass}">${diffLabel}</span>
-                    <button onclick="editSubject(${s.subject_id}, '${s.subject_name}', ${s.difficulty || 2})"
-                        class="icon-btn edit-btn" title="Edit">
-                        <i class="fas fa-pen"></i>
-                    </button>
-                    <button onclick="deleteSubject(${s.subject_id})"
-                        class="icon-btn delete-btn" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
+        // Render Timetable from Sessions
+        if (sessions.length > 0) {
+            renderTimetableFromSessions(sessions);
+        } else {
+            document.getElementById("timetableContainer").innerHTML = `
+                <div class="empty-schedule">
+                    <i class="fas fa-calendar-alt"></i>
+                    <p>Your personalised timetable<br>will appear here after you<br>add a subject! 🗓️</p>
                 </div>`;
-            list.appendChild(li);
-        });
-
-        const today     = new Date().toISOString().slice(0, 10);
-        const todaySess = sessions.filter(s => s.date === today);
-        const statusEl  = document.getElementById("scheduleStatus");
-        if (statusEl) {
-            statusEl.textContent = todaySess.length > 0
-                ? `Today: ${todaySess.filter(s => s.completed).length}/${todaySess.length} done 🎯`
-                : total > 0 ? `${total} sessions scheduled 📅` : "Awaiting plan ✨";
+            const statusEl = document.getElementById("scheduleStatus");
+            if (statusEl) statusEl.textContent = "Awaiting plan ✨";
         }
 
     } catch (err) {
         console.error("loadSessions error:", err);
     }
+}
+
+
+function renderTimetableFromSessions(sessions) {
+    const timetable = sessions.map(s => {
+        const d = new Date(s.date + "T00:00:00");
+        const dayName = d.toLocaleDateString("en-US", { weekday: "long" });
+        const dateFormatted = d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+
+        let startTime = "";
+        let endTime   = "";
+        if (s.notes && s.notes.includes("–")) {
+            const parts = s.notes.split("–");
+            startTime = parts[0].trim();
+            endTime   = parts[1].trim();
+        } else if (s.notes && s.notes.includes("-")) {
+            const parts = s.notes.split("-");
+            startTime = parts[0].trim();
+            endTime   = parts[1].trim();
+        }
+
+        const approach = getStudyApproachClient(s.subject_name, s.difficulty, s.topics);
+
+        return {
+            id:         s.id,
+            date:       dateFormatted,
+            rawDate:    s.date,
+            day:        dayName,
+            subject:    s.subject_name,
+            priority:   s.priority_label,
+            start_time: startTime || "Study Slot",
+            end_time:   endTime || "",
+            hours:      s.hours_allocated,
+            completed:  s.completed,
+            approach:   approach.approach,
+            technique:  approach.technique,
+            steps:      approach.steps,
+            difficulty: s.difficulty,
+            topics:     s.topics || [],
+        };
+    });
+
+    renderTimetable(timetable);
 }
 
 
@@ -753,7 +853,7 @@ function renderTimetable(timetable) {
 
         entries.forEach(entry => {
             const card     = document.createElement("div");
-            card.className = "session-card";
+            card.className = "session-card" + (entry.completed ? " completed-card" : "");
 
             const diffLabel = ["", "Easy", "Medium", "Hard"][entry.difficulty] || "Medium";
             const diffClass = ["", "badge-easy", "badge-med", "badge-hard"][entry.difficulty] || "badge-med";
@@ -768,10 +868,20 @@ function renderTimetable(timetable) {
                 ? `<span class="topics-badge">🎯 ${entry.topics.join(", ")}</span>`
                 : "";
 
+            const timeDisplay = entry.start_time && entry.end_time
+                ? `⏰ ${entry.start_time} → ${entry.end_time}`
+                : `⏰ ${entry.start_time}`;
+
             card.innerHTML = `
                 <div class="session-main" onclick="toggleSession(this)">
-                    <span class="session-time-badge">⏰ ${entry.start_time} → ${entry.end_time}</span>
-                    <span class="session-subject-name">${escapeHTML(entry.subject)}</span>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <input type="checkbox" class="mission-check" style="cursor:pointer;"
+                            ${entry.completed ? "checked" : ""}
+                            onclick="event.stopPropagation();"
+                            onchange="markCompleted(${entry.id}, this)">
+                        <span class="session-time-badge">${timeDisplay}</span>
+                        <span class="session-subject-name" style="${entry.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${escapeHTML(entry.subject)}</span>
+                    </div>
                     <div class="session-meta">
                         ${topicsBadge}
                         <span class="badge ${urgClass}">${entry.priority}</span>
@@ -818,7 +928,6 @@ function toggleSession(el) {
 
 async function markCompleted(sessionId, checkbox) {
     try {
-        // FIX BUG 2: use correct endpoint /api/sessions/${sessionId}/complete/
         const res = await fetch(`/api/sessions/${sessionId}/complete/`, {
             method: "PATCH",
             headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -837,33 +946,7 @@ async function markCompleted(sessionId, checkbox) {
 async function deleteSubject(subjectId) {
     if (!confirm("Delete this subject? 🗑️")) return;
 
-    const li = document.querySelector(`[data-sid="${String(subjectId)}"]`);
-    if (li) {
-        li.style.transition = "all 0.3s";
-        li.style.opacity    = "0";
-        li.style.transform  = "translateX(20px)";
-        setTimeout(() => li.remove(), 300);
-    }
-
-    document.getElementById("timetableContainer").innerHTML = `
-        <div class="empty-schedule">
-            <i class="fas fa-calendar-alt"></i>
-            <p>Subject deleted! Click <strong>Regenerate</strong><br>to refresh your schedule 🔄</p>
-        </div>`;
-
-    setTimeout(() => {
-        const remaining = document.querySelectorAll("#missionList .mission-item").length;
-        if (remaining === 0) {
-            document.getElementById("missionList").innerHTML = `
-                <li class="mission-empty">
-                    <i class="fas fa-seedling"></i>
-                    <p>No subjects yet.<br>Add one above to get started! 🌱</p>
-                </li>`;
-        }
-    }, 350);
-
     try {
-        // FIX BUG 3: use correct endpoint /api/subjects/${subjectId}/
         await fetch(`/api/subjects/${subjectId}/`, {
             method: "DELETE",
             headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -880,14 +963,10 @@ async function editSubject(subjectId, currentName, currentDiff) {
     const newName = prompt("Subject name:", currentName);
     if (newName === null || newName.trim() === "") return;
 
-    const newDiff = prompt("Difficulty (1=Easy, 2=Medium, 3=Hard):", currentDiff);
-    if (newDiff === null) return;
-
-    const li = document.querySelector(`[data-sid="${String(subjectId)}"]`);
-    if (li) {
-        const nameEl = li.querySelector(".mission-name");
-        if (nameEl) nameEl.textContent = newName.trim();
-    }
+    const diffInput = prompt("Difficulty (1=Easy, 2=Medium, 3=Hard):", currentDiff);
+    if (diffInput === null) return;
+    const parsedDiff = parseInt(diffInput, 10);
+    const newDiff = (parsedDiff >= 1 && parsedDiff <= 3) ? parsedDiff : 2;
 
     try {
         const res = await fetch(`/api/subjects/${subjectId}/`, {
@@ -898,7 +977,7 @@ async function editSubject(subjectId, currentName, currentDiff) {
             },
             body: JSON.stringify({
                 name:       newName.trim(),
-                difficulty: parseInt(newDiff),
+                difficulty: newDiff,
             }),
         });
         if (res.ok) {
@@ -927,10 +1006,6 @@ async function regeneratePlan() {
 
         if (!genRes.ok) { alert("Generation failed 😢"); return; }
 
-        const data = await genRes.json();
-        if (data.timetable && data.timetable.length > 0) {
-            renderTimetable(data.timetable);
-        }
         await loadSessions();
     } catch (err) {
         console.error(err);
@@ -1071,7 +1146,7 @@ async function toggleNotifications() {
         const scheduled = await scheduleNotifications();
 
         sendNotification(
-            "🔔 StudyBuddy Reminders Activated!",
+            "🔔 FOCUSFORGE Reminders Activated!",
             scheduled > 0
                 ? `${scheduled} reminder(s) scheduled for today's sessions.`
                 : "No upcoming sessions today. Add a subject with a future exam date!",
@@ -1105,7 +1180,7 @@ async function scheduleNotifications() {
         if (!res.ok) return 0;
         const sessions = await res.json();
 
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayStr = getLocalDateString();
         const todaySessions = sessions.filter(s => s.date === todayStr && !s.completed);
 
         todaySessions.forEach(session => {
@@ -1193,210 +1268,8 @@ function getCookie(name) {
 }
 
 
-// ── FOCUS MODE VARIABLES ──────────────────────────────────────
-let focusModel      = null;
-let focusStream     = null;
-let focusDetectLoop = null;
-let focusTimerLoop  = null;
-let focusStartTime  = null;
-
-let focusDistCount  = 0;
-let focusFocusSecs  = 0;
-
-let focusAlarmCtx   = null;
-let focusAlarmOsc   = null;
-let focusAlarmGain  = null;
-
-let phoneDetected   = false;
-
-
-// FIX BUG 4: Single clean startFocusMode — opens in new tab, no orphaned code
+// ── FOCUS MODE ──────────────────────────────────────────────────
 function startFocusMode(subjectName) {
-    const encoded = encodeURIComponent(subjectName);
+    const encoded = encodeURIComponent(subjectName || "Study Session");
     window.open(`/focus/?subject=${encoded}`, "_blank");
-}
-
-
-// ─────────────────────────────────
-function stopFocusMode() {
-    const modal = document.getElementById("focusModal");
-    modal.style.display = "none";
-
-    if (focusStream) {
-        focusStream.getTracks().forEach(t => t.stop());
-        focusStream = null;
-    }
-
-    if (focusDetectLoop) {
-        cancelAnimationFrame(focusDetectLoop);
-        focusDetectLoop = null;
-    }
-
-    if (focusTimerLoop) {
-        clearInterval(focusTimerLoop);
-        focusTimerLoop = null;
-    }
-
-    stopAlarm();
-
-    const mins = Math.floor(focusFocusSecs / 60);
-
-    alert(
-`🧠 Focus session complete!
-
-⏱ Focus time: ${mins} minute(s)
-⚠️ Distractions: ${focusDistCount}`
-    );
-}
-
-function runDetection() {
-    const video  = document.getElementById("focusWebcam");
-    const canvas = document.getElementById("focusCanvas");
-
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-
-    async function detect() {
-        if (!focusStream || !focusModel) {
-            return;
-        }
-
-        canvas.width  = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        try {
-            const predictions = await focusModel.detect(video);
-
-            const phoneFound = predictions.some(
-                p => p.class === "cell phone" && p.score > 0.40
-            );
-
-            const personFound = predictions.some(
-                p => p.class === "person" && p.score > 0.40
-            );
-
-            if (phoneFound || !personFound) {
-                if (!phoneDetected) {
-                    phoneDetected = true;
-                    focusDistCount++;
-                    document.getElementById("focusDistractions").textContent = focusDistCount;
-                    playAlarm();
-                }
-
-                setFocusStatus(
-                    "distracted",
-                    phoneFound
-                        ? "⚠️ Phone detected!"
-                        : "⚠️ You left the camera!"
-                );
-            } else {
-                if (phoneDetected) {
-                    phoneDetected = false;
-                    stopAlarm();
-                }
-
-                setFocusStatus("focused", "✅ You're focused!");
-
-                focusFocusSecs++;
-
-                const mins = Math.floor(focusFocusSecs / 60);
-                document.getElementById("focusFocusTime").textContent = `${mins}m`;
-            }
-
-        } catch (e) {
-            console.error("Detection error:", e);
-        }
-
-        focusDetectLoop = requestAnimationFrame(detect);
-    }
-
-    detect();
-}
-
-// ─────────────────────────────────
-function setFocusStatus(type, text) {
-    const statusEl = document.getElementById("focusStatus");
-    const iconEl   = document.getElementById("focusStatusIcon");
-    const textEl   = document.getElementById("focusStatusText");
-
-    statusEl.className = `focus-status ${type === "distracted" ? "distracted" : ""}`;
-
-    iconEl.className = `focus-status-icon ${type}`;
-
-    iconEl.innerHTML =
-        type === "distracted"
-        ? '<i class="fas fa-exclamation-triangle"></i>'
-        : '<i class="fas fa-check-circle"></i>';
-
-    textEl.textContent = text;
-}
-
-
-// ─────────────────────────────────
-function updateFocusTimer() {
-    if (!focusStartTime) return;
-
-    const elapsed = Math.floor((Date.now() - focusStartTime) / 1000);
-
-    const h = String(Math.floor(elapsed / 3600)).padStart(2, "0");
-    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
-    const s = String(elapsed % 60).padStart(2, "0");
-
-    document.getElementById("focusTimer").textContent = `${h}:${m}:${s}`;
-}
-
-
-function toggleCameraPreview() {
-    const preview = document.getElementById("focusPreviewContainer");
-
-    if (!preview) return;
-
-    if (preview.style.display === "none") {
-        preview.style.display = "block";
-    } else {
-        preview.style.display = "none";
-    }
-}
-
-
-function playAlarm() {
-    if (focusAlarmCtx) return;
-
-    focusAlarmCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    focusAlarmGain = focusAlarmCtx.createGain();
-    focusAlarmGain.gain.value = 0.3;
-    focusAlarmGain.connect(focusAlarmCtx.destination);
-
-    function beep() {
-        if (!focusAlarmCtx) return;
-
-        const osc = focusAlarmCtx.createOscillator();
-        osc.type = "square";
-        osc.frequency.value = 800;
-        osc.connect(focusAlarmGain);
-        osc.start();
-        osc.stop(focusAlarmCtx.currentTime + 0.15);
-
-        focusAlarmOsc = setTimeout(beep, 500);
-    }
-
-    beep();
-}
-
-
-function stopAlarm() {
-    if (focusAlarmOsc) {
-        clearTimeout(focusAlarmOsc);
-        focusAlarmOsc = null;
-    }
-
-    if (focusAlarmCtx) {
-        focusAlarmCtx.close();
-        focusAlarmCtx = null;
-        focusAlarmGain = null;
-    }
 }
